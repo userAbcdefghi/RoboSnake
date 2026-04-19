@@ -422,7 +422,7 @@ function draw() {
 }
 
 // ── Game Logic ───────────────────────────────────────────
-function getInterval() { return Math.max(90, 210 - Math.floor(score/3)*20); }
+function getInterval() { return Math.max(90, 280 - Math.floor(score/3)*20); }
 
 function updateUI() {
   var lv=Math.floor(score/3)+1, pct=Math.round((1-(getInterval()-90)/120)*100);
