@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>RoboFlail Snake | Rapid Technic AG</title>
+<style>
+  @import url('https://script.google.com/macros/s/AKfycbwbuCBEDxNvqHiecLfDnBfrDnc0pP9hweRZdGRkfp0XpBA_GqiuB0EHLVtks1ZQPYYM/exec');
+
+  :root {
+    --orange: #F06800;
+    --orange-dark: #C85500;
+    --black: #111111;
+    --gray: #4A4A4A;
+    --gray-mid: #888;
+    --gray-light: #D8D8D8;
+    --bg: #F0EDEA;
+    --white: #FFFFFF;
+    --red: #C82000;
+    --green-dark: #1C2E0A;
+  }
+
+  /* ► HIER DEINE APPS SCRIPT URL EINTRAGEN ◄ */
+  /* Wird im Script-Block unten als SCRIPT_URL gesetzt */
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { font-family: 'Barlow', sans-serif; background: var(--bg); color: var(--black); overflow-x: hidden; }
+
+  nav {
+    background: var(--white); border-bottom: 3px solid var(--orange);
+    height: 48px; display: flex; align-items: center; padding: 0 16px;
+    justify-content: space-between; position: sticky; top: 0; z-index: 100;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+  }
+  .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+  .logo-mark { width: 30px; height: 30px; background: var(--orange); clip-path: polygon(0 0, 100% 0, 100% 100%, 14% 100%); display: flex; align-items: center; justify-content: center; }
+  .logo-r { font-family: 'Barlow Condensed', sans-serif; font-weight: 900; font-size: 1.1rem; color: white; margin-left: 3px; }
+  .logo-text { font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 1.25rem; color: var(--black); line-height: 1; }
+  .logo-text span { display: block; font-weight: 400; font-size: 0.52rem; letter-spacing: 2px; text-transform: uppercase; color: var(--gray-mid); margin-top: -1px; }
+  .nav-links { display: none; }
+  @media (min-width: 820px) {
+    .nav-links { display: flex; gap: 26px; list-style: none; }
+    .nav-links a { font-family: 'Barlow Condensed', sans-serif; font-weight: 600; font-size: 0.88rem; letter-spacing: 0.8px; text-transform: uppercase; color: var(--gray); text-decoration: none; }
+    .nav-links a.active { color: var(--orange); border-bottom: 2px solid var(--orange); padding-bottom: 1px; }
+  }
+  .nav-cta { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 0.75rem; letter-spacing: 1.5px; text-transform: uppercase; background: var(--orange); color: white; border: none; padding: 6px 14px; cursor: pointer; clip-path: polygon(6px 0%, 100% 0%, calc(100% - 6px) 100%, 0% 100%); }
+
+  .hero-strip { background: var(--black); padding: 8px 16px; display: flex; align-items: center; justify-content: space-between; gap: 8px; border-bottom: 1px solid #2A2A2A; }
+  .hero-title { font-family: 'Barlow Condensed', sans-serif; font-weight: 900; font-size: 1.05rem; text-transform: uppercase; color: white; }
+  .hero-title span { color: var(--orange); }
+  .hero-tag { font-family: 'Barlow Condensed', sans-serif; font-size: 0.6rem; letter-spacing: 1.5px; text-transform: uppercase; color: #666; }
+
+  .page { max-width: 1060px; margin: 0 auto; padding: 12px 12px 16px; display: grid; grid-template-columns: 1fr; gap: 14px; }
+  @media (min-width: 820px) { .page { grid-template-columns: 1fr 300px; padding: 24px 20px 40px; gap: 22px; } }
+
+  .game-section { display: flex; flex-direction: column; gap: 0; }
+  .section-eyebrow { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 0.6rem; letter-spacing: 3px; text-transform: uppercase; color: var(--orange); border-left: 3px solid var(--orange); padding-left: 8px; margin-bottom: 8px; }
+
+  .score-bar { background: var(--white); border: 1px solid var(--gray-light); border-top: 3px solid var(--orange); display: flex; align-items: stretch; }
+  .score-cell { padding: 7px 12px; border-right: 1px solid var(--gray-light); min-width: 72px; }
+  .score-cell:last-child { border-right: none; flex: 1; }
+  .score-lbl { font-family: 'Barlow Condensed', sans-serif; font-size: 0.55rem; letter-spacing: 2px; text-transform: uppercase; color: var(--gray-mid); display: block; }
+  .score-val { font-family: 'Barlow Condensed', sans-serif; font-weight: 900; font-size: 1.6rem; color: var(--orange); line-height: 1.1; }
+  .speed-cell { padding: 7px 12px; flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 5px; }
+  .speed-track { height: 5px; background: var(--gray-light); border-radius: 3px; overflow: hidden; }
+  .speed-fill { height: 100%; background: linear-gradient(90deg, #F06800, #FF3300); border-radius: 3px; transition: width 0.4s ease; }
+
+  .canvas-wrap { position: relative; border: 1px solid var(--gray-light); border-top: none; box-shadow: 0 6px 24px rgba(0,0,0,0.12); overflow: hidden; background: var(--green-dark); touch-action: none; }
+  canvas { display: block; width: 100%; }
+
+  .overlay { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(10,10,10,0.92); backdrop-filter: blur(6px); gap: 12px; padding: 20px; }
+  .overlay.hidden { display: none; }
+  .ov-eye { font-family: 'Barlow Condensed', sans-serif; font-size: 0.62rem; letter-spacing: 3px; text-transform: uppercase; color: var(--orange); text-align: center; }
+  .ov-title { font-family: 'Barlow Condensed', sans-serif; font-weight: 900; font-size: clamp(2.2rem, 8vw, 3.4rem); text-transform: uppercase; color: white; letter-spacing: -1px; line-height: 0.92; text-align: center; }
+  .ov-title span { color: var(--orange); }
+  .ov-desc { font-size: 0.8rem; color: #999; text-align: center; max-width: 290px; line-height: 1.5; }
+
+  /* Name Input */
+  .name-input-wrap { display: flex; flex-direction: column; align-items: center; gap: 8px; width: 100%; max-width: 280px; }
+  .name-input-wrap label { font-family: 'Barlow Condensed', sans-serif; font-size: 0.65rem; letter-spacing: 2px; text-transform: uppercase; color: #888; }
+  .name-input { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 1.1rem; letter-spacing: 1px; background: #1a1a1a; border: 2px solid #333; color: white; padding: 10px 16px; width: 100%; text-align: center; outline: none; }
+  .name-input:focus { border-color: var(--orange); }
+  .name-input::placeholder { color: #555; font-weight: 400; }
+
+  .btn { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 1rem; letter-spacing: 2px; text-transform: uppercase; background: var(--orange); color: white; border: none; padding: 14px 36px; cursor: pointer; clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%); transition: background 0.15s, transform 0.1s; touch-action: manipulation; -webkit-user-select: none; user-select: none; display: inline-block; }
+  .btn:active { transform: scale(0.97); background: var(--orange-dark); }
+  .btn-secondary { background: #2a2a2a; }
+  .btn-secondary:active { background: #333; }
+
+  .final-score-txt { font-family: 'Barlow Condensed', sans-serif; font-size: 1.1rem; color: white; letter-spacing: 1px; text-align: center; }
+  .final-score-sub { font-size: 0.8rem; color: #666; text-align: center; margin-top: 2px; }
+  .upload-status { font-family: 'Barlow Condensed', sans-serif; font-size: 0.72rem; letter-spacing: 1px; color: #888; text-align: center; min-height: 18px; }
+  .upload-status.ok   { color: #4CAF50; }
+  .upload-status.err  { color: var(--red); }
+
+  .ctrl-row { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; }
+  .ctrl { font-family: 'Barlow Condensed', sans-serif; font-size: 0.68rem; letter-spacing: 1px; text-transform: uppercase; color: #777; }
+  .key { display: inline-block; background: #222; border: 1px solid #555; border-bottom: 3px solid #3A3A3A; padding: 1px 6px; font-size: 0.68rem; color: #ddd; font-family: monospace; border-radius: 2px; }
+
+  /* D-Pad */
+  .mobile-controls { display: flex; justify-content: space-between; align-items: center; padding: 10px 8px 8px; background: var(--white); border: 1px solid var(--gray-light); border-top: none; gap: 8px; }
+  .dpad { display: grid; grid-template-columns: repeat(3, 48px); grid-template-rows: repeat(3, 48px); gap: 3px; }
+  .dpad-btn { background: var(--black); border: 1.5px solid #333; border-radius: 5px; display: flex; align-items: center; justify-content: center; cursor: pointer; touch-action: manipulation; -webkit-user-select: none; user-select: none; color: var(--orange); font-size: 1.2rem; transition: background 0.08s, transform 0.08s; }
+  .dpad-btn:active { background: var(--orange); color: white; transform: scale(0.92); }
+  .dpad-center { background: #1a1a1a; border-color: #2a2a2a; color: #333; }
+  .dpad-btn.up    { grid-column: 2; grid-row: 1; }
+  .dpad-btn.left  { grid-column: 1; grid-row: 2; }
+  .dpad-btn.center{ grid-column: 2; grid-row: 2; }
+  .dpad-btn.right { grid-column: 3; grid-row: 2; }
+  .dpad-btn.down  { grid-column: 2; grid-row: 3; }
+  .action-btns { display: flex; gap: 8px; }
+  .action-btn { width: 56px; height: 56px; background: var(--black); border: 1.5px solid #333; border-radius: 5px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; touch-action: manipulation; -webkit-user-select: none; user-select: none; transition: background 0.08s, transform 0.08s; gap: 2px; }
+  .action-btn:active { transform: scale(0.92); }
+  .ab-label { font-family: 'Barlow Condensed', sans-serif; font-size: 0.52rem; letter-spacing: 1.5px; text-transform: uppercase; color: #666; }
+  .ab-icon { font-size: 1.15rem; }
+  .pause-btn { border-color: var(--orange); }
+  .pause-btn .ab-icon { color: var(--orange); }
+  .pause-btn:active { background: var(--orange); }
+  .restart-btn .ab-icon { color: #777; }
+  .restart-btn:active { background: #333; }
+
+  /* Sidebar */
+  .sidebar { display: flex; flex-direction: column; gap: 14px; }
+  @media (max-width: 819px) { .sidebar { flex-direction: row; flex-wrap: wrap; } .sidebar .card { flex: 1 1 calc(50% - 7px); min-width: 150px; } }
+  @media (max-width: 480px) { .sidebar .card:nth-child(n+3) { display: none; } }
+
+  .card { background: var(--white); border: 1px solid var(--gray-light); border-top: 3px solid var(--orange); padding: 14px 16px; }
+  .card h3 { font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; color: var(--black); }
+
+  /* Rangliste */
+  .rangliste-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .rangliste-header h3 { margin-bottom: 0; }
+  .refresh-btn { font-family: 'Barlow Condensed', sans-serif; font-size: 0.6rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--orange); cursor: pointer; background: none; border: none; padding: 0; -webkit-user-select: none; user-select: none; }
+  .refresh-btn:active { opacity: 0.6; }
+
+  .rl-table { width: 100%; border-collapse: collapse; }
+  .rl-table th { font-family: 'Barlow Condensed', sans-serif; font-size: 0.55rem; letter-spacing: 2px; text-transform: uppercase; color: var(--gray-mid); text-align: left; padding: 4px 6px 6px; border-bottom: 1px solid var(--gray-light); }
+  .rl-table th:last-child { text-align: right; }
+  .rl-table td { font-family: 'Barlow Condensed', sans-serif; font-size: 0.8rem; padding: 5px 6px; border-bottom: 1px solid #f5f5f5; color: var(--gray); }
+  .rl-table td:last-child { text-align: right; font-weight: 700; color: var(--orange); }
+  .rl-table tr:last-child td { border-bottom: none; }
+  .rl-rank { font-size: 0.65rem; color: var(--gray-mid); width: 20px; }
+  .rl-rank.gold   { color: #C8960C; font-weight: 700; }
+  .rl-rank.silver { color: #888; font-weight: 700; }
+  .rl-rank.bronze { color: #A0522D; font-weight: 700; }
+  .rl-empty { font-family: 'Barlow Condensed', sans-serif; font-size: 0.78rem; color: #bbb; text-align: center; padding: 16px 0; }
+  .rl-loading { font-family: 'Barlow Condensed', sans-serif; font-size: 0.72rem; color: #bbb; text-align: center; padding: 12px 0; letter-spacing: 1px; }
+
+  /* Tipps */
+  .tip-list { list-style: none; display: flex; flex-direction: column; gap: 7px; }
+  .tip-list li { font-size: 0.78rem; color: var(--gray); line-height: 1.4; display: flex; gap: 7px; align-items: flex-start; }
+  .tip-list li::before { content: '▶'; color: var(--orange); font-size: 0.55rem; margin-top: 3px; flex-shrink: 0; }
+
+  .tag { display: inline-block; background: var(--orange); color: white; font-family: 'Barlow Condensed', sans-serif; font-size: 0.6rem; font-weight: 700; letter-spacing: 1px; padding: 1px 7px; text-transform: uppercase; margin-top: 3px; clip-path: polygon(4px 0%, 100% 0%, calc(100% - 4px) 100%, 0% 100%); }
+  .att-row { display: flex; align-items: center; gap: 10px; padding: 7px 0; border-bottom: 1px solid #f0f0f0; }
+  .att-row:last-of-type { border-bottom: none; }
+  .att-ico { width: 34px; height: 22px; border-radius: 2px; display: flex; align-items: center; justify-content: center; font-family: 'Barlow Condensed', sans-serif; font-size: 0.52rem; font-weight: 700; color: rgba(255,255,255,0.85); flex-shrink: 0; }
+  .att-info strong { display: block; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 0.82rem; color: var(--black); }
+  .att-info small { font-size: 0.7rem; color: var(--gray-mid); }
+
+  footer { background: var(--black); color: #666; padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; border-top: 3px solid var(--orange); margin-top: 8px; }
+  .ft-brand { font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 0.9rem; color: white; }
+  .ft-brand span { color: var(--orange); }
+  .ft-copy { font-size: 0.65rem; letter-spacing: 0.8px; text-transform: uppercase; }
+  @media (max-width: 480px) { footer { flex-direction: column; align-items: flex-start; gap: 6px; } }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="#">
+    <div class="logo-mark"><span class="logo-r">R</span></div>
+    <div class="logo-text">Rapid<span>Technic AG</span></div>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#">Produkte</a></li>
+    <li><a href="#">RoboFlail</a></li>
+    <li><a href="#" class="active">Snake Game</a></li>
+  </ul>
+  <button class="nav-cta">Machen wir.</button>
+</nav>
+
+<div class="hero-strip">
+  <div>
+    <div class="hero-title">RoboFlail <span>Snake</span></div>
+    <div class="hero-tag">Rapid Technic AG · 100 Jahre Rapid 1926–2026</div>
+  </div>
+  <div class="hero-tag" style="text-align:right;">Schweizer Qualität<br>seit 1926</div>
+</div>
+
+<div class="page">
+  <div class="game-section">
+    <div class="section-eyebrow">Spielfeld — RoboFlail Einsatz</div>
+
+    <div class="score-bar">
+      <div class="score-cell"><span class="score-lbl">Anbaugeräte</span><span class="score-val" id="scoreDisplay">0</span></div>
+      <div class="score-cell"><span class="score-lbl">Rekord</span><span class="score-val" id="highscoreDisplay">0</span></div>
+      <div class="score-cell"><span class="score-lbl">Stufe</span><span class="score-val" id="levelDisplay">1</span></div>
+      <div class="speed-cell">
+        <span class="score-lbl">Geschwindigkeit</span>
+        <div class="speed-track"><div class="speed-fill" id="speedFill" style="width:5%"></div></div>
+      </div>
+    </div>
+
+    <div class="canvas-wrap" id="canvasWrap">
+      <canvas id="gameCanvas"></canvas>
+
+      <!-- Start Screen -->
+      <div class="overlay" id="startScreen">
+        <div class="ov-eye">Rapid Technic AG · Killwangen</div>
+        <div class="ov-title">RoboFlail<br><span>Snake</span></div>
+        <div class="ov-desc">Steuere den RoboFlail durchs Feld und sammle SM130 Mulcher. Dein Score landet in der Firmen-Rangliste!</div>
+        <div class="name-input-wrap">
+          <label>Dein Name für die Rangliste</label>
+          <input class="name-input" type="text" id="playerNameStart" placeholder="Name eingeben..." maxlength="30" autocomplete="off" autocorrect="off" autocapitalize="words" spellcheck="false">
+        </div>
+        <div id="btnStart" class="btn">Spiel starten</div>
+        <div class="ctrl-row">
+          <span class="ctrl"><span class="key">↑↓←→</span> Steuern</span>
+          <span class="ctrl"><span class="key">P</span> Pause</span>
+        </div>
+      </div>
+
+      <!-- Game Over Screen -->
+      <div class="overlay hidden" id="gameOverScreen">
+        <div class="ov-eye">Einsatz beendet — Kollision erkannt</div>
+        <div class="ov-title">Kollision<br><span>Erkannt</span></div>
+        <div class="final-score-txt" id="finalScoreTxt"></div>
+        <div class="final-score-sub" id="finalScoreSub"></div>
+        <div class="name-input-wrap">
+          <label>Name für Rangliste</label>
+          <input class="name-input" type="text" id="playerNameEnd" placeholder="Name eingeben..." maxlength="30" autocomplete="off" autocorrect="off" autocapitalize="words" spellcheck="false">
+        </div>
+        <div id="btnSubmit" class="btn">Score eintragen</div>
+        <div class="upload-status" id="uploadStatus"></div>
+        <div id="btnRetry" class="btn btn-secondary">Nochmal</div>
+      </div>
+    </div>
+
+    <!-- D-Pad -->
+    <div class="mobile-controls">
+      <div class="dpad">
+        <div class="dpad-btn up"     id="btnUp">▲</div>
+        <div class="dpad-btn left"   id="btnLeft">◀</div>
+        <div class="dpad-btn center dpad-center">✦</div>
+        <div class="dpad-btn right"  id="btnRight">▶</div>
+        <div class="dpad-btn down"   id="btnDown">▼</div>
+      </div>
+      <div class="action-btns">
+        <div class="action-btn pause-btn" id="btnPause">
+          <span class="ab-icon" id="pauseIcon">⏸</span>
+          <span class="ab-label">Pause</span>
+        </div>
+        <div class="action-btn restart-btn" id="btnRestart">
+          <span class="ab-icon">↺</span>
+          <span class="ab-label">Neu</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+
+    <!-- Rangliste -->
+    <div class="card">
+      <div class="rangliste-header">
+        <h3>🏆 Rangliste</h3>
+        <div class="refresh-btn" id="btnRefresh">↻ Aktualisieren</div>
+      </div>
+      <div id="ranglisteContent">
+        <div class="rl-loading">Wird geladen...</div>
+      </div>
+    </div>
+
+    <!-- Ausrüstung -->
+    <div class="card">
+      <h3>Ausrüstung</h3>
+      <div class="att-row">
+        <div class="att-ico" style="background:#2A2A2A;">RF</div>
+        <div class="att-info"><strong>RoboFlail D401</strong><small>Funkraupe · Grundgerät</small><div><span class="tag">Kopf</span></div></div>
+      </div>
+      <div class="att-row">
+        <div class="att-ico" style="background:#C82000;">SM130</div>
+        <div class="att-info"><strong>Mulcher SM130</strong><small>Arbeitsbreite 130 cm</small><div><span class="tag">Anbaugerät</span></div></div>
+      </div>
+    </div>
+
+    <!-- Tipps -->
+    <div class="card">
+      <h3>Profi-Tipps</h3>
+      <ul class="tip-list">
+        <li>Route vorausplanen — der Zug wird länger!</li>
+        <li>Alle 3 Mulcher = höhere Geschwindigkeit.</li>
+        <li>Wände &amp; eigener Zug = sofortige Kollision.</li>
+        <li>Ecken als Wendemanöver einplanen.</li>
+      </ul>
+    </div>
+
+    <div class="card" style="background:var(--black);border-top-color:var(--orange);">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:0.9rem;color:var(--orange);margin-bottom:8px;text-transform:uppercase;">Können wir. Machen wir.</div>
+      <p style="font-size:0.73rem;color:#999;line-height:1.5;">Steigungen bis 120 % · Funkbedienung · Schweizer Qualität seit 1926.</p>
+      <div style="margin-top:10px;"><a href="https://rapid.ch" target="_blank" style="font-family:'Barlow Condensed',sans-serif;font-size:0.8rem;color:var(--orange);text-decoration:none;letter-spacing:1.5px;text-transform:uppercase;font-weight:700;">→ rapid.ch</a></div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="ft-brand"><span>Rapid</span> Technic AG · CH-8956 Killwangen</div>
+  <div class="ft-copy">© 2026 Rapid Technic AG · Fan-Spiel</div>
+</footer>
+
+<script>
+// ════════════════════════════════════════════════════════
+// ► HIER DEINE APPS SCRIPT URL EINTRAGEN ◄
+// Nach dem Deployen aus Apps Script kopieren
+// ════════════════════════════════════════════════════════
+var SCRIPT_URL = 'DEINE_APPS_SCRIPT_URL_HIER';
+
+// ── Canvas Setup ─────────────────────────────────────────
+var canvas = document.getElementById('gameCanvas');
+var ctx    = canvas.getContext('2d');
+var CELL, COLS, ROWS;
+
+function resizeCanvas() {
+  var w = document.getElementById('canvasWrap').clientWidth;
+  CELL = w <= 400 ? 28 : w <= 600 ? 34 : 44;
+  COLS = Math.floor(w / CELL);
+  ROWS = Math.floor((w * 0.73) / CELL);
+  canvas.width  = COLS * CELL;
+  canvas.height = ROWS * CELL;
+  if (gameRunning && !paused) draw(); else drawField();
+}
+window.addEventListener('resize', resizeCanvas);
+
+// ── Game State ───────────────────────────────────────────
+var snake, dir, nextDir, food, score, highscore = 0, gameLoop;
+var paused = false, gameRunning = false;
+
+// ── Drawing Helpers ──────────────────────────────────────
+function rr(x,y,w,h,r) {
+  r = Math.min(r, w/2, h/2);
+  ctx.beginPath();
+  ctx.moveTo(x+r,y); ctx.lineTo(x+w-r,y);
+  ctx.quadraticCurveTo(x+w,y,x+w,y+r); ctx.lineTo(x+w,y+h-r);
+  ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h); ctx.lineTo(x+r,y+h);
+  ctx.quadraticCurveTo(x,y+h,x,y+h-r); ctx.lineTo(x,y+r);
+  ctx.quadraticCurveTo(x,y,x+r,y); ctx.closePath();
+}
+function dAngle(d) {
+  if (d.y===-1) return 0;
+  if (d.x=== 1) return Math.PI/2;
+  if (d.y=== 1) return Math.PI;
+  if (d.x===-1) return -Math.PI/2;
+  return 0;
+}
+
+function drawHead(cx,cy,angle) {
+  ctx.save(); ctx.translate(cx,cy); ctx.rotate(angle);
+  var BW=CELL*0.58,BL=CELL*0.88,TW=CELL*0.17,TL=BL*1.06,TX=BW/2+1.5;
+  ctx.fillStyle='#111'; rr(-TX-TW,-TL/2,TW,TL,TW/2); ctx.fill(); rr(TX,-TL/2,TW,TL,TW/2); ctx.fill();
+  ctx.strokeStyle='#252525'; ctx.lineWidth=1.3;
+  for(var i=0;i<7;i++){var ty=-TL/2+7+i*(TL-14)/6;ctx.beginPath();ctx.moveTo(-TX-TW+1.5,ty);ctx.lineTo(-TX-1.5,ty);ctx.stroke();ctx.beginPath();ctx.moveTo(TX+1.5,ty);ctx.lineTo(TX+TW-1.5,ty);ctx.stroke();}
+  [-TL/2+TW/2,TL/2-TW/2].forEach(function(wy){[-TX-TW/2,TX+TW/2].forEach(function(wx){ctx.fillStyle='#1A1A1A';ctx.beginPath();ctx.arc(wx,wy,TW/2,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#333';ctx.lineWidth=1;ctx.beginPath();ctx.arc(wx,wy,TW/2-1,0,Math.PI*2);ctx.stroke();});});
+  ctx.fillStyle='#F06800'; rr(-BW/2,-BL/2,BW,BL,5); ctx.fill();
+  var HW=BW*0.76,HL=BL*0.78; ctx.fillStyle='#282828'; rr(-HW/2,-HL/2,HW,HL,4); ctx.fill();
+  ctx.fillStyle='#F06800';
+  for(var i=0;i<5;i++){ctx.fillRect(-HW/2+HW*0.14+i*HW*0.155,-HL/2+5,HW*0.09,5);}
+  ctx.strokeStyle='#3A3A3A';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(0,-HL/2+16);ctx.lineTo(0,HL/2-10);ctx.stroke();
+  ctx.fillStyle='#FF8830';ctx.font='bold '+Math.round(CELL*0.17)+'px Barlow Condensed,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('RAPID',0,5);
+  var fy=-BL/2-2;ctx.fillStyle='#444';rr(-7,fy-5,14,9,3);ctx.fill();ctx.fillStyle='#88C4FF';ctx.beginPath();ctx.arc(0,fy,3.5,0,Math.PI*2);ctx.fill();
+  ctx.strokeStyle='#999';ctx.lineWidth=2;ctx.beginPath();ctx.arc(0,BL/2+3,4,0,Math.PI);ctx.stroke();
+  ctx.restore();
+}
+
+function drawAttachment(cx,cy,angle,idx) {
+  ctx.save(); ctx.translate(cx,cy); ctx.rotate(angle);
+  var W=CELL*0.70,H=CELL*0.50,hw=W/2,hh=H/2;
+  ctx.fillStyle='rgba(0,0,0,0.2)'; rr(-hw+3,-hh+3,W,H,3); ctx.fill();
+  ctx.fillStyle=idx%2===0?'#C82000':'#B01A00'; rr(-hw,-hh,W,H,3); ctx.fill();
+  ctx.fillStyle='#A0A0A0'; rr(-hw+2,-hh,W-4,H*0.28,2); ctx.fill();
+  ctx.fillStyle='#666'; ctx.beginPath();ctx.arc(-hw+8,-hh+H*0.14,2.5,0,Math.PI*2);ctx.fill(); ctx.beginPath();ctx.arc(hw-8,-hh+H*0.14,2.5,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='rgba(255,255,255,0.72)';ctx.font='700 '+Math.round(CELL*0.12)+'px Barlow Condensed,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('SM130',0,hh*0.25);
+  ctx.fillStyle='#D85800';ctx.fillRect(-hw,-hh+H*0.28,5,H*0.72);ctx.fillRect(hw-5,-hh+H*0.28,5,H*0.72);
+  ctx.fillStyle='#7A1200'; rr(-hw,-hh+H*0.62,W,H*0.38,2); ctx.fill();
+  ctx.restore();
+}
+
+function drawFood() {
+  var t=Date.now()/650, p=0.85+0.15*Math.sin(t);
+  var cx=food.x*CELL+CELL/2, cy=food.y*CELL+CELL/2;
+  ctx.save(); ctx.translate(cx,cy); ctx.scale(p,p);
+  var g=ctx.createRadialGradient(0,0,0,0,0,CELL*0.6);
+  g.addColorStop(0,'rgba(220,60,0,0.32)'); g.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=g; ctx.beginPath();ctx.arc(0,0,CELL*0.6,0,Math.PI*2);ctx.fill();
+  var W=CELL*0.54,H=CELL*0.36;
+  ctx.fillStyle='#CC2000'; rr(-W/2,-H/2,W,H,3); ctx.fill();
+  ctx.fillStyle='rgba(255,255,255,0.75)';ctx.font='700 '+Math.round(CELL*0.12)+'px Barlow Condensed,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('SM130',0,H*0.2);
+  ctx.fillStyle='#F06800';ctx.beginPath();ctx.arc(-W/2+1,-H/2+1,7,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='white';ctx.font='bold '+Math.round(CELL*0.22)+'px sans-serif';ctx.fillText('+',-W/2+1,-H/2+2);
+  ctx.restore();
+}
+
+function drawField() {
+  for(var r=0;r<ROWS;r++) for(var c=0;c<COLS;c++){ctx.fillStyle=(r+c)%2===0?'#1C2E0A':'#172509';ctx.fillRect(c*CELL,r*CELL,CELL,CELL);}
+  ctx.strokeStyle='rgba(255,255,255,0.035)';ctx.lineWidth=0.5;
+  for(var c=0;c<=COLS;c++){ctx.beginPath();ctx.moveTo(c*CELL,0);ctx.lineTo(c*CELL,canvas.height);ctx.stroke();}
+  for(var r=0;r<=ROWS;r++){ctx.beginPath();ctx.moveTo(0,r*CELL);ctx.lineTo(canvas.width,r*CELL);ctx.stroke();}
+  ctx.strokeStyle='rgba(240,104,0,0.2)';ctx.lineWidth=2.5;ctx.strokeRect(1.25,1.25,canvas.width-2.5,canvas.height-2.5);
+}
+
+function draw() {
+  drawField();
+  ctx.strokeStyle='rgba(200,70,0,0.4)';ctx.lineWidth=2.5;ctx.setLineDash([5,5]);
+  for(var i=0;i<snake.length-1;i++){ctx.beginPath();ctx.moveTo(snake[i].x*CELL+CELL/2,snake[i].y*CELL+CELL/2);ctx.lineTo(snake[i+1].x*CELL+CELL/2,snake[i+1].y*CELL+CELL/2);ctx.stroke();}
+  ctx.setLineDash([]);
+  for(var i=snake.length-1;i>=1;i--){var s=snake[i],prev=snake[i-1];drawAttachment(s.x*CELL+CELL/2,s.y*CELL+CELL/2,dAngle({x:prev.x-s.x,y:prev.y-s.y}),i);}
+  drawFood();
+  drawHead(snake[0].x*CELL+CELL/2,snake[0].y*CELL+CELL/2,dAngle(dir));
+  if(paused&&gameRunning){
+    ctx.fillStyle='rgba(0,0,0,0.7)';ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.fillStyle='#F06800';ctx.font='900 '+Math.round(CELL*1.2)+'px Barlow Condensed,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('PAUSE',canvas.width/2,canvas.height/2);
+    ctx.fillStyle='#888';ctx.font='600 '+Math.round(CELL*0.4)+'px Barlow Condensed,sans-serif';ctx.fillText('Tippe ⏸ zum Fortfahren',canvas.width/2,canvas.height/2+CELL*0.9);
+  }
+}
+
+// ── Game Logic ───────────────────────────────────────────
+function getInterval() { return Math.max(90, 210 - Math.floor(score/3)*20); }
+
+function updateUI() {
+  var lv=Math.floor(score/3)+1, pct=Math.round((1-(getInterval()-90)/120)*100);
+  document.getElementById('levelDisplay').textContent=lv;
+  document.getElementById('speedFill').style.width=Math.min(pct,100)+'%';
+}
+
+function spawnFood() {
+  var p;
+  do { p={x:Math.floor(Math.random()*COLS),y:Math.floor(Math.random()*ROWS)}; }
+  while(snake.some(function(s){return s.x===p.x&&s.y===p.y;}));
+  food=p;
+}
+
+function step() {
+  if(paused) return;
+  dir={x:nextDir.x,y:nextDir.y};
+  var h=snake[0], nh={x:h.x+dir.x,y:h.y+dir.y};
+  if(nh.x<0||nh.x>=COLS||nh.y<0||nh.y>=ROWS){endGame();return;}
+  if(snake.some(function(s){return s.x===nh.x&&s.y===nh.y;})){endGame();return;}
+  snake.unshift(nh);
+  if(nh.x===food.x&&nh.y===food.y){
+    score++;
+    document.getElementById('scoreDisplay').textContent=score;
+    if(score>highscore){highscore=score;document.getElementById('highscoreDisplay').textContent=highscore;}
+    spawnFood(); updateUI();
+    clearInterval(gameLoop); gameLoop=setInterval(step,getInterval());
+  } else { snake.pop(); }
+  draw();
+}
+
+function getPlayerName() {
+  var n1 = (document.getElementById('playerNameStart').value || '').trim();
+  var n2 = (document.getElementById('playerNameEnd').value || '').trim();
+  return n2 || n1 || 'Anonym';
+}
+
+function startGame() {
+  // Name vom Start-Screen in End-Screen übernehmen
+  var nameVal = document.getElementById('playerNameStart').value.trim();
+  if (nameVal) document.getElementById('playerNameEnd').value = nameVal;
+
+  document.getElementById('startScreen').classList.add('hidden');
+  document.getElementById('gameOverScreen').classList.add('hidden');
+  document.getElementById('uploadStatus').textContent = '';
+  score=0; paused=false; gameRunning=true;
+  document.getElementById('scoreDisplay').textContent=0;
+  document.getElementById('pauseIcon').textContent='⏸';
+  var mc=Math.floor(COLS/2), mr=Math.floor(ROWS/2);
+  snake=[{x:mc,y:mr},{x:mc,y:mr+1},{x:mc,y:mr+2}];
+  dir={x:0,y:-1}; nextDir={x:0,y:-1};
+  spawnFood(); updateUI();
+  clearInterval(gameLoop); gameLoop=setInterval(step,getInterval());
+}
+
+function endGame() {
+  clearInterval(gameLoop); gameRunning=false;
+  ctx.fillStyle='rgba(255,40,0,0.18)';ctx.fillRect(0,0,canvas.width,canvas.height);
+  setTimeout(function(){
+    document.getElementById('finalScoreTxt').textContent = score + ' SM130 Mulcher gesammelt';
+    document.getElementById('finalScoreSub').textContent = 'Rekord dieser Session: ' + highscore;
+    document.getElementById('uploadStatus').textContent = '';
+    document.getElementById('gameOverScreen').classList.remove('hidden');
+    // Fokus auf Namensfeld
+    setTimeout(function(){ document.getElementById('playerNameEnd').focus(); }, 300);
+  }, 200);
+}
+
+// ── Score Upload ─────────────────────────────────────────
+function submitScore() {
+  var name  = getPlayerName();
+  var status = document.getElementById('uploadStatus');
+
+  if (!name || name === 'Anonym') {
+    document.getElementById('playerNameEnd').focus();
+    status.textContent = 'Bitte Namen eingeben!';
+    status.className   = 'upload-status err';
+    return;
+  }
+  if (score === 0) {
+    status.textContent = 'Score ist 0 — zuerst spielen!';
+    status.className   = 'upload-status err';
+    return;
+  }
+
+  status.textContent = 'Wird eingetragen...';
+  status.className   = 'upload-status';
+
+  // Apps Script erwartet CORS-freundlichen POST
+  fetch(SCRIPT_URL, {
+    method:  'POST',
+    mode:    'no-cors', // Apps Script braucht no-cors
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name: name, score: score })
+  })
+  .then(function() {
+    status.textContent = '✓ Score eingetragen! Rangliste wird aktualisiert...';
+    status.className   = 'upload-status ok';
+    loadRangliste();
+  })
+  .catch(function(err) {
+    status.textContent = 'Fehler beim Eintragen. Netz prüfen.';
+    status.className   = 'upload-status err';
+  });
+}
+
+// ── Rangliste ─────────────────────────────────────────────
+function loadRangliste() {
+  var el = document.getElementById('ranglisteContent');
+  el.innerHTML = '<div class="rl-loading">Wird geladen...</div>';
+
+  fetch(SCRIPT_URL + '?action=scores&t=' + Date.now())
+  .then(function(r){ return r.json(); })
+  .then(function(data){
+    if (!data.scores || data.scores.length === 0) {
+      el.innerHTML = '<div class="rl-empty">Noch keine Einträge.<br>Sei der Erste!</div>';
+      return;
+    }
+    var top = data.scores.slice(0, 15);
+    var html = '<table class="rl-table"><thead><tr><th>#</th><th>Name</th><th>Score</th></tr></thead><tbody>';
+    var medals = ['🥇','🥈','🥉'];
+    var rankClass = ['gold','silver','bronze'];
+    top.forEach(function(entry, i) {
+      var rankDisplay = i < 3 ? medals[i] : (i+1);
+      var rc = i < 3 ? rankClass[i] : '';
+      html += '<tr><td class="rl-rank ' + rc + '">' + rankDisplay + '</td>'
+            + '<td>' + escHtml(entry.name) + '</td>'
+            + '<td>' + entry.score + '</td></tr>';
+    });
+    html += '</tbody></table>';
+    el.innerHTML = html;
+  })
+  .catch(function(){
+    el.innerHTML = '<div class="rl-empty">Rangliste nicht verfügbar.<br>URL prüfen.</div>';
+  });
+}
+
+function escHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ── Controls ─────────────────────────────────────────────
+function applyDir(dx,dy) {
+  if(!gameRunning||paused) return;
+  if(!(dx===-dir.x&&dy===-dir.y)) nextDir={x:dx,y:dy};
+}
+function togglePause() {
+  if(!gameRunning) return;
+  paused=!paused;
+  document.getElementById('pauseIcon').textContent=paused?'▶':'⏸';
+  draw();
+}
+
+function addBtn(id,fn) {
+  var el=document.getElementById(id);
+  if(!el) return;
+  el.addEventListener('touchstart',function(e){e.preventDefault();fn();},{passive:false});
+  el.addEventListener('pointerdown',function(e){e.preventDefault();fn();},{passive:false});
+}
+
+window.addEventListener('DOMContentLoaded', function() {
+  addBtn('btnUp',      function(){applyDir(0,-1);});
+  addBtn('btnDown',    function(){applyDir(0,1);});
+  addBtn('btnLeft',    function(){applyDir(-1,0);});
+  addBtn('btnRight',   function(){applyDir(1,0);});
+  addBtn('btnPause',   togglePause);
+  addBtn('btnRestart', startGame);
+  addBtn('btnStart',   startGame);
+  addBtn('btnSubmit',  submitScore);
+  addBtn('btnRetry',   startGame);
+  addBtn('btnRefresh', loadRangliste);
+
+  // Enter-Taste im Namensfeld startet Spiel
+  document.getElementById('playerNameStart').addEventListener('keydown', function(e){
+    if(e.key==='Enter') startGame();
+  });
+  document.getElementById('playerNameEnd').addEventListener('keydown', function(e){
+    if(e.key==='Enter') submitScore();
+  });
+
+  resizeCanvas();
+  drawField();
+  loop();
+  loadRangliste();
+});
+
+var KM={ArrowUp:{x:0,y:-1},ArrowDown:{x:0,y:1},ArrowLeft:{x:-1,y:0},ArrowRight:{x:1,y:0},w:{x:0,y:-1},s:{x:0,y:1},a:{x:-1,y:0},d:{x:1,y:0},W:{x:0,y:-1},S:{x:0,y:1},A:{x:-1,y:0},D:{x:1,y:0}};
+document.addEventListener('keydown',function(e){
+  if(e.key==='p'||e.key==='P'){togglePause();return;}
+  if(e.key==='r'||e.key==='R'){startGame();return;}
+  if(KM[e.key]&&gameRunning&&!paused){
+    var d=KM[e.key];
+    if(!(d.x===-dir.x&&d.y===-dir.y)) nextDir=d;
+    if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key)) e.preventDefault();
+  }
+});
+
+var touchStartX=0,touchStartY=0;
+canvas.addEventListener('touchstart',function(e){e.preventDefault();touchStartX=e.touches[0].clientX;touchStartY=e.touches[0].clientY;},{passive:false});
+canvas.addEventListener('touchend',function(e){
+  e.preventDefault();
+  var dx=e.changedTouches[0].clientX-touchStartX, dy=e.changedTouches[0].clientY-touchStartY;
+  if(Math.max(Math.abs(dx),Math.abs(dy))<20){togglePause();return;}
+  if(!gameRunning||paused) return;
+  var d=Math.abs(dx)>Math.abs(dy)?(dx>0?{x:1,y:0}:{x:-1,y:0}):(dy>0?{x:0,y:1}:{x:0,y:-1});
+  if(!(d.x===-dir.x&&d.y===-dir.y)) nextDir=d;
+},{passive:false});
+
+function loop() { if(gameRunning&&!paused) draw(); requestAnimationFrame(loop); }
+</script>
+</body>
+</html>
