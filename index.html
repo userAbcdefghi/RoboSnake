@@ -218,7 +218,6 @@
         <div id="btnStart" class="btn">Spiel starten</div>
         <div class="ctrl-row">
           <span class="ctrl"><span class="key">↑↓←→</span> Steuern</span>
-          <span class="ctrl"><span class="key">P</span> Pause</span>
         </div>
       </div>
 
@@ -248,10 +247,6 @@
         <div class="dpad-btn down"   id="btnDown">▼</div>
       </div>
       <div class="action-btns">
-        <div class="action-btn pause-btn" id="btnPause">
-          <span class="ab-icon" id="pauseIcon">⏸</span>
-          <span class="ab-label">Pause</span>
-        </div>
         <div class="action-btn restart-btn" id="btnRestart">
           <span class="ab-icon">↺</span>
           <span class="ab-label">Neu</span>
@@ -611,6 +606,7 @@ window.addEventListener('DOMContentLoaded', function() {
 
 var KM={ArrowUp:{x:0,y:-1},ArrowDown:{x:0,y:1},ArrowLeft:{x:-1,y:0},ArrowRight:{x:1,y:0},w:{x:0,y:-1},s:{x:0,y:1},a:{x:-1,y:0},d:{x:1,y:0},W:{x:0,y:-1},S:{x:0,y:1},A:{x:-1,y:0},D:{x:1,y:0}};
 document.addEventListener('keydown',function(e){
+  if (document.activeElement.tagName === 'INPUT') return;
   if(e.key==='p'||e.key==='P'){togglePause();return;}
   if(e.key==='r'||e.key==='R'){startGame();return;}
   if(KM[e.key]&&gameRunning&&!paused){
